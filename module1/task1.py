@@ -9,30 +9,51 @@
 Ограничьте размер кеша до 100 записей. При превышении этого лимита удаляйте наиболее старые записи (используйте подход FIFO).
 """
 
-cache_dict = {}
-
 import unittest.mock
 
 
 def lru_cache(*args, **kwargs):
+    cache_dict = {}
     maxsize = kwargs['maxsize'] if 'maxsize' in kwargs else None
+    print(args, kwargs)
+    if args:
+        func = args[0]
 
-    def decorator(func):
         def wrapper(*f_args, **f_kwargs):
             res = func(*f_args, **f_kwargs)
             if f_args in cache_dict:
                 return cache_dict[f_args]
             cache_dict[f_args] = res
 
-            if maxsize and len(cache_dict) > maxsize:
-                first_key = list(cache_dict.keys())[0]
-                cache_dict.pop(first_key)
+            if maxsize:
+                while len(cache_dict) > maxsize:
+                    first_key = list(cache_dict.keys())[0]
+                    cache_dict.pop(first_key)
 
             return res
 
         return wrapper
 
-    return decorator
+
+    else:
+
+        def decorator(func):
+            def wrapper(*f_args, **f_kwargs):
+                res = func(*f_args, **f_kwargs)
+                if f_args in cache_dict:
+                    return cache_dict[f_args]
+                cache_dict[f_args] = res
+
+                if maxsize:
+                    while len(cache_dict) > maxsize:
+                        first_key = list(cache_dict.keys())[0]
+                        cache_dict.pop(first_key)
+
+                return res
+
+            return wrapper
+
+        return decorator
 
 
 @lru_cache
