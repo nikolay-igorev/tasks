@@ -7,6 +7,7 @@
 с помощью метода __new__ класса
 через механизм импортов
 """
+import my_singleton
 
 
 class SingletonMeta(type):
@@ -26,3 +27,6 @@ class Singleton(object):
         if not isinstance(class_._instance, class_):
             class_._instance = object.__new__(class_, *args, **kwargs)
         return class_._instance
+
+
+singleton = my_singleton.MySingleton()

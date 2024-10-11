@@ -8,7 +8,6 @@
 Реализуйте кеширование с использованием словаря, где ключами будут аргументы функции, а значениями — результаты её выполнения.
 Ограничьте размер кеша до 100 записей. При превышении этого лимита удаляйте наиболее старые записи (используйте подход FIFO).
 """
-import inspect
 import unittest.mock
 
 
@@ -28,6 +27,7 @@ def cache_wrapper(func, cache_dict, maxsize, f_args, f_kwargs):
 def lru_cache(*args, **kwargs):
     cache_dict = {}
     maxsize = kwargs['maxsize'] if 'maxsize' in kwargs else None
+
     if args:
         func = args[0]
 
