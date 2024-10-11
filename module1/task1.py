@@ -8,48 +8,39 @@
 Реализуйте кеширование с использованием словаря, где ключами будут аргументы функции, а значениями — результаты её выполнения.
 Ограничьте размер кеша до 100 записей. При превышении этого лимита удаляйте наиболее старые записи (используйте подход FIFO).
 """
-
+import inspect
 import unittest.mock
+
+
+def cache_wrapper(func, cache_dict, maxsize, f_args, f_kwargs):
+    res = func(*f_args, **f_kwargs)
+    if f_args in cache_dict:
+        return cache_dict[f_args]
+    cache_dict[f_args] = res
+
+    if maxsize and len(cache_dict) > maxsize:
+        first_key = list(cache_dict.keys())[0]
+        cache_dict.pop(first_key)
+
+    return res
 
 
 def lru_cache(*args, **kwargs):
     cache_dict = {}
     maxsize = kwargs['maxsize'] if 'maxsize' in kwargs else None
-    print(args, kwargs)
     if args:
         func = args[0]
 
         def wrapper(*f_args, **f_kwargs):
-            res = func(*f_args, **f_kwargs)
-            if f_args in cache_dict:
-                return cache_dict[f_args]
-            cache_dict[f_args] = res
-
-            if maxsize:
-                while len(cache_dict) > maxsize:
-                    first_key = list(cache_dict.keys())[0]
-                    cache_dict.pop(first_key)
-
-            return res
+            return cache_wrapper(func, cache_dict, maxsize, f_args, f_kwargs)
 
         return wrapper
-
 
     else:
 
         def decorator(func):
             def wrapper(*f_args, **f_kwargs):
-                res = func(*f_args, **f_kwargs)
-                if f_args in cache_dict:
-                    return cache_dict[f_args]
-                cache_dict[f_args] = res
-
-                if maxsize:
-                    while len(cache_dict) > maxsize:
-                        first_key = list(cache_dict.keys())[0]
-                        cache_dict.pop(first_key)
-
-                return res
+                return cache_wrapper(func, cache_dict, maxsize, f_args, f_kwargs)
 
             return wrapper
 
