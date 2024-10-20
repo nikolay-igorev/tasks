@@ -29,7 +29,7 @@ class BookViewSet(mixins.CreateModelMixin,
         serializer.is_valid(raise_exception=True)
 
         try:
-            Book.objects.filter(id=pk).update(count=F('count') - 1)
+            Book.objects.filter(id=pk).update(count=F('count') - serializer.validated_data["count"])
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

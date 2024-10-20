@@ -36,5 +36,4 @@ class BookBuySerializer(serializers.ModelSerializer):
         read_only_fields = (
             'title',
             'author',
-            'count',
         )
