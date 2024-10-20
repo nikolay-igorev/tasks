@@ -14,6 +14,7 @@ import unittest.mock
 def cache_wrapper(func, cache_dict, maxsize, f_args, f_kwargs):
     res = func(*f_args, **f_kwargs)
     if f_args in cache_dict:
+        # f_args.__hash__()
         return cache_dict[f_args]
     cache_dict[f_args] = res
 

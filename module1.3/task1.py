@@ -10,13 +10,8 @@
 Сохраните все результаты в файл
 """
 
-
 import asyncio
 import aiohttp
-import requests
-from time import time
-
-from aiohttp import ClientConnectorError
 
 urls = [
     "https://example.com",
@@ -25,19 +20,23 @@ urls = [
 ]
 
 
+def worker(url, session, urls_dict, file):
+    try:
+        response = session.get(url)
+        status = response.status
+        urls_dict[url] = status
+        file.write(f'{url} {status}\n')
+    except aiohttp.ClientConnectorError:
+        urls_dict[url] = 0
+        file.write(f'{url} {0}\n')
+
+
 async def fetch_urls(urls: list[str], file_path: str):
     urls_dict = {}
     with open(file_path, 'w') as file:
         async with aiohttp.ClientSession() as session:
-            for url in urls:
-                try:
-                    async with session.get(url) as response:
-                        status = response.status
-                        urls_dict[url] = status
-                        file.write(f'{url} {status}\n')
-                except ClientConnectorError:
-                    urls_dict[url] = 0
-                    file.write(f'{url} {0}\n')
+            tasks = [asyncio.create_task(worker(url, session, urls_dict, file)) for url in urls]
+            await asyncio.gather(*tasks)
 
 
 if __name__ == '__main__':

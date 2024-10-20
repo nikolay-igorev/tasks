@@ -9,5 +9,5 @@ import datetime
 
 class MyMeta(type):
     def __new__(cls, name, bases, attrs):
-        attrs['created_at'] = datetime.datetime
+        attrs['created_at'] = datetime.datetime.now()
         return super().__new__(cls, name, bases, attrs)

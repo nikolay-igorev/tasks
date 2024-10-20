@@ -33,12 +33,13 @@
 """
 
 import multiprocessing
-import concurrent.futures
 import random
 import time
+import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Process
 
+big_number = 1000000
 
 def generate_data(n):
     for i in range(n):
@@ -66,15 +67,15 @@ def timemometr(func):
 @timemometr
 def a():
     with ThreadPoolExecutor(max_workers=2) as executor:
-        executor.submit(generate_data, 1000000)
-        executor.submit(process_number, 994)
+        for n in generate_data(big_number):
+            executor.submit(process_number, n)
 
 
 @timemometr
 def b():
-    process = Process(target=generate_data, args=(1000000,))
-    process.start()
-    process.join()
+    with multiprocessing.Pool(processes=2) as pool:
+        for n in generate_data(big_number):
+            pool.apply_async(process_number, (n,))
 
 
 @timemometr
@@ -84,8 +85,8 @@ def c():
 
 @timemometr
 def d():
-    generate_data(1000000)
-    process_number(994)
+    for n in generate_data(big_number):
+        process_number(n)
 
 
 if __name__ == '__main__':
