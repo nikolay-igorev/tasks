@@ -1,5 +1,6 @@
 from django.db import IntegrityError
 from django.db.models import F
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -27,6 +28,11 @@ class BookViewSet(mixins.CreateModelMixin,
     def buy(self, request, pk):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        try:
+            get_object_or_404(Book, id=pk)
+        except Book.DoesNotExist:
+            return Response({"detail": "The book does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             Book.objects.filter(id=pk).update(count=F('count') - serializer.validated_data["count"])
