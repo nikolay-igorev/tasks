@@ -29,16 +29,17 @@ class BookViewSet(mixins.CreateModelMixin,
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        try:
-            get_object_or_404(Book, id=pk)
-        except Book.DoesNotExist:
-            return Response({"detail": "The book does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        book = self.get_object()
+        book.count = F('count') - serializer.validated_data["count"]
 
         try:
-            Book.objects.filter(id=pk).update(count=F('count') - serializer.validated_data["count"])
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
+            book.save(update_fields=('count',))
         except IntegrityError:
-            return Response({"detail": "Not enough books."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Not enough books."},
+                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED,
+                headers=self.get_success_headers(serializer.data))
